@@ -1,4 +1,6 @@
-public class Card {
+import java.io.Serializable;
+
+public class Card implements Serializable {
     String rank, suite;
 
     public Card(String rank, String suite) {
