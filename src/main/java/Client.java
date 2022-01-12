@@ -20,14 +20,12 @@ public class Client {
             playerNo = (int) inputStream.readObject();
             System.out.println("You have joined as Player " + (playerNo+1));
             scanner = new Scanner(System.in);
-        } catch (IOException ioException) {
-            System.out.println(ioException.getMessage());
-        } catch (ClassNotFoundException classNotFoundException) {
-            System.out.println(classNotFoundException.getMessage());
+        } catch (IOException | ClassNotFoundException exception) {
+            System.out.println(exception.getMessage());
         }
     }
 
-    private void makeMove() {
+    private void playGame() {
         try {
             while (true) {
                 Game game = (Game) inputStream.readObject();
@@ -36,16 +34,50 @@ public class Client {
                 String command = scanner.nextLine();
                 outputStream.writeObject(command);
                 outputStream.flush();
+                outputStream.reset();
+
+                game = (Game) inputStream.readObject();
+                System.out.println(game.toStringClient(playerNo));
+
+                if(game.current_player != playerNo) break;
             }
+            getResults();
+        } catch (IOException | ClassNotFoundException exception) {
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    private void getResults() {
+        try {
+            System.out.println(inputStream.readObject());
+            System.out.println(inputStream.readObject());
+
+            String command = scanner.nextLine();
+            outputStream.writeObject(command);
+            outputStream.flush();
+            outputStream.reset();
+
+            if(command.toLowerCase().startsWith("y")) playGame();
+        } catch (IOException | ClassNotFoundException exception) {
+            System.out.println(exception.getMessage());
+        }
+    }
+
+    private void closeConnection() {
+        try {
+            socket.close();
+            inputStream.close();
+            outputStream.close();
+            scanner.close();
+            System.out.println("Client connection closed.");
         } catch (IOException ioException) {
             System.out.println(ioException.getMessage());
-        } catch (ClassNotFoundException classNotFoundException) {
-            System.out.println(classNotFoundException.getMessage());
         }
     }
 
     public static void main(String[] args) {
         Client client = new Client();
-        client.makeMove();
+        client.playGame();
+        client.closeConnection();
     }
 }

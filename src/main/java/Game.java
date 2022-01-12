@@ -8,6 +8,7 @@ public class Game implements Serializable {
     final int AI_PLAYER = DEALER - 1;
     int players_connected = 0;
     int current_player;
+    boolean isGameOver;
     ArrayList<Player> players;
     ArrayList<Card> deck;
 
@@ -24,6 +25,7 @@ public class Game implements Serializable {
         firstRound();
         updatePlayerScores();
         current_player = 0;
+        isGameOver = false;
     }
 
     private void createDeck() {
@@ -41,13 +43,6 @@ public class Game implements Serializable {
 
     private void shuffleDeck() {
         Collections.shuffle(deck);
-    }
-
-    public void printDeck() {
-        for(Card card: deck) {
-            System.out.println(card.toString());
-        }
-        System.out.println("Deck Size: " + deck.size());
     }
 
     private void createPlayers() {
@@ -173,7 +168,7 @@ public class Game implements Serializable {
     }
 
     public void nextRound() {
-        while(current_player != 0) {
+        while(current_player <= DEALER) {
             if(current_player == AI_PLAYER) {
                 turnAI();
             }
@@ -184,8 +179,23 @@ public class Game implements Serializable {
     }
 
     public void updateCurrentPlayer() {
-        if(current_player == DEALER) current_player = 0;
-        else current_player++;
+        if(current_player == DEALER) isGameOver = true;
+        current_player++;
+    }
+
+    public String getGameResults() {
+        int maxScore = 0;
+        int winner = -1;
+        for(Player player: players) {
+            if(player.getScore() <= 21 && player.getScore() > maxScore) {
+                maxScore = player.getScore();
+                winner = player.getPlayerNo();
+            }
+            else if(player.getScore() == maxScore) {
+                if(player.getHand().size() < players.get(winner).getHand().size()) winner = player.getPlayerNo();
+            }
+        }
+        return getPlayerString(players.get(winner)) + " won the game with score " + maxScore;
     }
 
     private boolean isNumber(String numberString) {
@@ -221,7 +231,8 @@ public class Game implements Serializable {
             }
             message.append("\nscore: ").append(player.getScore()).append("\n\n");
         }
-        message.append("Player ").append(current_player + 1).append("'s turn.");
+        if(current_player > DEALER) message.append("Game Over.");
+        else message.append(getPlayerString(players.get(current_player))).append("'s turn.");
         return message.toString();
     }
 
@@ -237,12 +248,12 @@ public class Game implements Serializable {
                 message.append("\nscore: ").append(player.getScore()).append("\n\n");
             }
             else {
-                message.append(getPlayerString(player)).append("'s hand:").append(player.getHand().get(0).toString()).append("\n\n");
+                message.append(getPlayerString(player)).append("'s hand: ").append(player.getHand().get(0).toString()).append("\n\n");
             }
         }
-        if(clientNo == current_player) message.append("Your turn.");
-        else message.append("Player ").append(current_player + 1).append("'s turn.");
-        message.append(" Hit or Stay? (h/s)");
+        if(current_player > DEALER) message.append("Game Over.");
+        else if(clientNo == current_player) message.append("Your turn. Hit or Stay? (h/s)");
+        else message.append(getPlayerString(players.get(current_player))).append("'s turn.");
         return message.toString();
     }
 }

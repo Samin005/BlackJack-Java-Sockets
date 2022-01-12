@@ -16,16 +16,8 @@ public class Player implements Serializable {
         return playerNo;
     }
 
-    public void setPlayerNo(int playerNo) {
-        this.playerNo = playerNo;
-    }
-
     public ArrayList<Card> getHand() {
         return hand;
-    }
-
-    public void setHand(ArrayList<Card> hand) {
-        this.hand = hand;
     }
 
     public int getScore() {
