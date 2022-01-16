@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Game implements Serializable {
-    final int TOTAL_PLAYERS = 4;
+    int TOTAL_PLAYERS = 4;
     final int DEALER = TOTAL_PLAYERS - 1;
     final int AI_PLAYER = DEALER - 1;
     int players_connected = 0;
@@ -65,11 +65,12 @@ public class Game implements Serializable {
         deck.remove(card);
     }
 
-    private void updatePlayerScores() {
+    public void updatePlayerScores() {
         for(Player player: players) {
             int score = 0;
             for(Card card: player.hand) {
-                score += getCardScore(card, true);
+                if(score + 11 > 21 && card.getRank().equals("A")) score += getCardScore(card, false);
+                else score += getCardScore(card, true);
             }
             if(score > 21) {
                 score = 0;
@@ -181,6 +182,18 @@ public class Game implements Serializable {
     public void updateCurrentPlayer() {
         if(current_player == DEALER) isGameOver = true;
         current_player++;
+    }
+
+    public void emptyPlayerHand(Player player) {
+        for(Card card: player.hand) {
+            deck.add(card);
+        }
+        player.hand.clear();
+    }
+
+    public void assignCardToPlayer(Player player, Card card) {
+        player.hand.add(card);
+        if (deck.contains(card)) deck.remove(card);
     }
 
     public String getGameResults() {
